@@ -138,8 +138,11 @@ exports.handler = async (event, context) => {
         // Upload to Bunny
         const filename = `generated/${Date.now()}-${crypto.randomBytes(4).toString('hex')}.jpg`;
         const uploadUrl = `https://storage.bunnycdn.com/${BUNNY_STORAGE_ZONE}/${filename}`;
-
         const imageBuffer = Buffer.from(imageData, 'base64');
+
+        console.log('Bunny config:', { zone: BUNNY_STORAGE_ZONE, cdn: BUNNY_CDN_DOMAIN });
+        console.log('Upload URL:', uploadUrl);
+        console.log('Image buffer size:', imageBuffer.length, 'bytes');
 
         const uploadResponse = await fetch(uploadUrl, {
             method: 'PUT',
@@ -150,8 +153,12 @@ exports.handler = async (event, context) => {
             body: imageBuffer
         });
 
-        if (!uploadResponse.ok) {
-            console.error('Bunny upload failed');
+        console.log('Bunny response status:', uploadResponse.status);
+
+        if (!uploadResponse.ok && uploadResponse.status !== 201) {
+            const errorText = await uploadResponse.text();
+            console.error('Bunny upload failed:', uploadResponse.status, errorText);
+            console.log('Returning base64 fallback, imageData length:', imageData.length);
             return {
                 statusCode: 200,
                 headers,
@@ -164,6 +171,7 @@ exports.handler = async (event, context) => {
         }
 
         const imageUrl = `https://${BUNNY_CDN_DOMAIN}/${filename}`;
+        console.log('SUCCESS! CDN URL:', imageUrl);
 
         return {
             statusCode: 200,
