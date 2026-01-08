@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+
+# Reference projects
+New folder/
+
+# Netlify
+.netlify/
+
+# Build outputs
+dist/
+
+# Generated files
+*.mp4
+generated/

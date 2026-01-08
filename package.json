@@ -1,0 +1,11 @@
+{
+    "name": "ghostclips-io",
+    "version": "1.0.0",
+    "description": "AI-powered short-form video generator",
+    "scripts": {
+        "dev": "netlify dev"
+    },
+    "dependencies": {
+        "node-fetch": "^2.6.7"
+    }
+}
