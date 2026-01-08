@@ -58,16 +58,24 @@ exports.handler = async (event, context) => {
 
         console.log('Generating image with prompt:', enhancedPrompt.substring(0, 100) + '...');
 
-        // Call Google AI (Gemini with image generation)
+        // Call Google AI (Gemini Image Model)
+        const GEMINI_MODEL = 'gemini-3-pro-image-preview';
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GOOGLE_AI_API_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GOOGLE_AI_API_KEY}`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{
                         parts: [{ text: `Generate an image: ${enhancedPrompt}` }]
-                    }]
+                    }],
+                    generationConfig: {
+                        responseModalities: ["IMAGE"],
+                        imageConfig: {
+                            aspectRatio: "9:16",
+                            imageSize: "2K"
+                        }
+                    }
                 })
             }
         );
