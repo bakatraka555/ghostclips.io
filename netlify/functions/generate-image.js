@@ -67,11 +67,7 @@ exports.handler = async (event, context) => {
                 body: JSON.stringify({
                     contents: [{
                         parts: [{ text: `Generate an image: ${enhancedPrompt}` }]
-                    }],
-                    generationConfig: {
-                        responseModalities: ["image", "text"],
-                        responseMimeType: "image/jpeg"
-                    }
+                    }]
                 })
             }
         );
