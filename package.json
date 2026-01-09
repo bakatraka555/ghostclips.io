@@ -1,11 +1,12 @@
 {
-    "name": "ghostclips-io",
+    "name": "spotme-billboard",
     "version": "1.0.0",
-    "description": "AI-powered short-form video generator",
+    "description": "AI Billboard Generator - See yourself where you've always dreamed",
+    "type": "module",
     "scripts": {
-        "dev": "netlify dev"
+        "start": "npx serve public"
     },
     "dependencies": {
-        "node-fetch": "^2.6.7"
+        "node-fetch": "^3.3.2"
     }
 }

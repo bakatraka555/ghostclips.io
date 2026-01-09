@@ -1,6 +1,6 @@
 /**
- * Generate Image using Google AI (Imagen 3)
- * Adapted from Raincrest project
+ * SpotMe Billboard Generator
+ * Uses Google Gemini 3 Pro Image Preview
  */
 
 const fetch = require('node-fetch');
@@ -119,8 +119,8 @@ exports.handler = async (event, context) => {
 
         // Upload to Bunny.net
         const BUNNY_API_KEY = process.env.BUNNY_API_KEY;
-        const BUNNY_STORAGE_ZONE = process.env.BUNNY_STORAGE_ZONE || 'nano-banana';
-        const BUNNY_CDN_DOMAIN = process.env.BUNNY_CDN_DOMAIN || 'nano-banana.b-cdn.net';
+        const BUNNY_STORAGE_ZONE = process.env.BUNNY_STORAGE_ZONE || 'spotme';
+        const BUNNY_CDN_DOMAIN = process.env.BUNNY_CDN_DOMAIN || 'spotme.b-cdn.net';
 
         if (!BUNNY_API_KEY) {
             // Return base64 if no Bunny configured
@@ -136,7 +136,7 @@ exports.handler = async (event, context) => {
         }
 
         // Upload to Bunny
-        const filename = `generated/${Date.now()}-${crypto.randomBytes(4).toString('hex')}.jpg`;
+        const filename = `spotme/${Date.now()}-${crypto.randomBytes(4).toString('hex')}.jpg`;
         const uploadUrl = `https://storage.bunnycdn.com/${BUNNY_STORAGE_ZONE}/${filename}`;
         const imageBuffer = Buffer.from(imageData, 'base64');
 

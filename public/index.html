@@ -4,11 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GhostClips - AI Video Generator</title>
+    <meta name="theme-color" content="#0a0a0a">
+    <title>SpotMe - See Yourself Where You've Always Dreamed</title>
     <meta name="description"
-        content="Generate viral short-form videos with AI. Perfect for YouTube Shorts, TikTok, and Instagram Reels.">
+        content="Generate photorealistic billboards in Times Square, Tokyo, London and more. AI-powered billboard generator.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -17,34 +19,34 @@
         }
 
         :root {
-            --primary: #FFD93D;
-            --primary-dark: #F4C430;
-            --dark: #0a0a0a;
-            --dark-card: #141414;
-            --gray: #888;
-            --white: #fff;
+            --bg: #0a0a0a;
+            --surface: #1a1a1a;
+            --primary: #00f5d4;
+            --secondary: #ff006e;
+            --accent: #8338ec;
+            --text: #ffffff;
+            --text-muted: #888888;
         }
 
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--dark);
-            color: var(--white);
-            line-height: 1.6;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
         }
 
-        /* Navigation */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Nav */
         nav {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            padding: 1rem 2rem;
+            padding: 1.5rem 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(10, 10, 10, 0.9);
-            backdrop-filter: blur(10px);
-            z-index: 100;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .logo {
@@ -56,401 +58,263 @@
         }
 
         .logo span {
-            color: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .nav-links a {
-            color: var(--gray);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.2s;
-        }
-
-        .nav-links a:hover {
-            color: var(--white);
-        }
-
-        .btn {
+        .nav-cta {
+            background: var(--surface);
+            color: var(--text);
             padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
+            border-radius: 50px;
             text-decoration: none;
+            font-weight: 600;
             transition: all 0.2s;
-            cursor: pointer;
-            border: none;
-            font-size: 0.9rem;
         }
 
-        .btn-primary {
+        .nav-cta:hover {
             background: var(--primary);
-            color: var(--dark);
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: var(--white);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--bg);
         }
 
         /* Hero */
         .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 4rem 0 6rem;
             text-align: center;
-            padding: 6rem 2rem 4rem;
-            background: radial-gradient(ellipse at top, rgba(255, 217, 61, 0.1) 0%, transparent 50%);
         }
 
-        .hero-content {
-            max-width: 800px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            background: rgba(255, 217, 61, 0.1);
-            border: 1px solid rgba(255, 217, 61, 0.3);
-            border-radius: 50px;
-            font-size: 0.85rem;
-            color: var(--primary);
-            margin-bottom: 2rem;
-        }
-
-        h1 {
-            font-size: clamp(2.5rem, 6vw, 4rem);
-            font-weight: 800;
+        .hero h1 {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 900;
             line-height: 1.1;
             margin-bottom: 1.5rem;
         }
 
-        h1 span {
-            background: linear-gradient(135deg, var(--primary), #FF6B6B);
+        .hero h1 .gradient {
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .hero p {
             font-size: 1.25rem;
-            color: var(--gray);
-            margin-bottom: 2rem;
+            color: var(--text-muted);
             max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
+            margin: 0 auto 2rem;
         }
 
-        .hero-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .hero-buttons .btn {
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: var(--bg);
             padding: 1rem 2rem;
-            font-size: 1rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+        }
+
+        .hero-cta:hover {
+            transform: scale(1.05);
+        }
+
+        /* Examples */
+        .examples {
+            padding: 4rem 0;
+        }
+
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .example-card {
+            border-radius: 16px;
+            overflow: hidden;
+            background: var(--surface);
+            aspect-ratio: 9/16;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .example-card .label {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
         }
 
         /* Features */
         .features {
-            padding: 6rem 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
+            padding: 6rem 0;
         }
 
-        .section-title {
+        .features h2 {
             text-align: center;
-            margin-bottom: 4rem;
-        }
-
-        .section-title h2 {
             font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .section-title p {
-            color: var(--gray);
-            max-width: 500px;
-            margin: 0 auto;
+            margin-bottom: 3rem;
         }
 
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 2rem;
         }
 
-        .feature-card {
-            background: var(--dark-card);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
+        .feature {
+            background: var(--surface);
             padding: 2rem;
-            transition: transform 0.2s, border-color 0.2s;
+            border-radius: 16px;
+            text-align: center;
         }
 
-        .feature-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(255, 217, 61, 0.3);
-        }
-
-        .feature-icon {
-            font-size: 2.5rem;
+        .feature .icon {
+            font-size: 3rem;
             margin-bottom: 1rem;
         }
 
-        .feature-card h3 {
+        .feature h3 {
             font-size: 1.25rem;
             margin-bottom: 0.5rem;
         }
 
-        .feature-card p {
-            color: var(--gray);
-            font-size: 0.95rem;
-        }
-
-        /* Pricing */
-        .pricing {
-            padding: 6rem 2rem;
-            background: var(--dark-card);
-        }
-
-        .pricing-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .price-card {
-            background: var(--dark);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 2rem;
-            text-align: center;
-        }
-
-        .price-card.featured {
-            border-color: var(--primary);
-            position: relative;
-        }
-
-        .price-card.featured::before {
-            content: 'POPULAR';
-            position: absolute;
-            top: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--primary);
-            color: var(--dark);
-            padding: 0.25rem 1rem;
-            border-radius: 50px;
-            font-size: 0.75rem;
-            font-weight: 700;
-        }
-
-        .price-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .price {
-            font-size: 3rem;
-            font-weight: 800;
-            margin: 1rem 0;
-        }
-
-        .price span {
-            font-size: 1rem;
-            color: var(--gray);
-            font-weight: 400;
-        }
-
-        .price-features {
-            list-style: none;
-            margin: 2rem 0;
-            text-align: left;
-        }
-
-        .price-features li {
-            padding: 0.5rem 0;
-            color: var(--gray);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .price-features li::before {
-            content: '✓';
-            color: var(--primary);
-        }
-
-        .price-card .btn {
-            width: 100%;
+        .feature p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
         }
 
         /* CTA */
-        .cta {
-            padding: 6rem 2rem;
+        .cta-section {
+            padding: 6rem 0;
             text-align: center;
         }
 
-        .cta h2 {
+        .cta-section h2 {
             font-size: 2.5rem;
             margin-bottom: 1rem;
         }
 
-        .cta p {
-            color: var(--gray);
+        .cta-section p {
+            color: var(--text-muted);
             margin-bottom: 2rem;
         }
 
         /* Footer */
         footer {
-            padding: 3rem 2rem;
+            padding: 2rem 0;
             text-align: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            color: var(--gray);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--surface);
         }
 
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-
-            .hero-buttons {
-                flex-direction: column;
-            }
+        footer a {
+            color: var(--text-muted);
+            margin: 0 0.5rem;
         }
     </style>
 </head>
 
 <body>
-    <nav>
-        <div class="logo">👻 <span>GhostClips</span></div>
-        <div class="nav-links">
-            <a href="#features">Features</a>
-            <a href="#pricing">Pricing</a>
-            <a href="app.html" class="btn btn-primary">Get Started</a>
-        </div>
-    </nav>
+    <div class="container">
+        <!-- Nav -->
+        <nav>
+            <div class="logo">📍 <span>SpotMe</span></div>
+            <a href="app.html" class="nav-cta">Try Free →</a>
+        </nav>
 
-    <section class="hero">
-        <div class="hero-content">
-            <div class="badge">🚀 AI-Powered Video Generation</div>
-            <h1>Create <span>Viral Videos</span> in Seconds</h1>
-            <p>Generate scroll-stopping short-form content for YouTube Shorts, TikTok, and Instagram Reels. No editing
-                skills needed.</p>
-            <div class="hero-buttons">
-                <a href="app.html" class="btn btn-primary">Start Creating Free →</a>
-                <a href="#features" class="btn btn-secondary">See How It Works</a>
-            </div>
-        </div>
-    </section>
+        <!-- Hero -->
+        <section class="hero">
+            <h1>
+                See Yourself Where<br>
+                <span class="gradient">You've Always Dreamed</span>
+            </h1>
+            <p>
+                Generate photorealistic billboards in Times Square, Tokyo, London
+                and more with AI. Perfect for social media, motivation, or just fun.
+            </p>
+            <a href="app.html" class="hero-cta">
+                ✨ Create Your Billboard — Free
+            </a>
+        </section>
 
-    <section class="features" id="features">
-        <div class="section-title">
-            <h2>Everything You Need</h2>
-            <p>Powerful AI tools to create engaging content at scale</p>
-        </div>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">🎨</div>
-                <h3>AI Image Generation</h3>
-                <p>Create stunning images from text prompts using Google's Imagen 3 model.</p>
+        <!-- Examples -->
+        <section class="examples">
+            <div class="examples-grid">
+                <div class="example-card" style="background: linear-gradient(135deg, #1a1a2e, #4a0e4e);">
+                    🗽
+                    <span class="label">NYC Times Square</span>
+                </div>
+                <div class="example-card" style="background: linear-gradient(135deg, #1a1a2e, #0e4a4e);">
+                    🗼
+                    <span class="label">Tokyo Shibuya</span>
+                </div>
+                <div class="example-card" style="background: linear-gradient(135deg, #1a1a2e, #4e4a0e);">
+                    🎡
+                    <span class="label">London Piccadilly</span>
+                </div>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">🎬</div>
-                <h3>Auto Video Effects</h3>
-                <p>Zoom In, Zoom Out, Glitch - choose from viral video templates.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🗣️</div>
-                <h3>AI Voiceover</h3>
-                <p>Add dramatic narration with Google's Neural voices.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🎲</div>
-                <h3>Random Prompts</h3>
-                <p>Stuck for ideas? Get viral prompt suggestions instantly.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🎮</div>
-                <h3>Gaming Overlays</h3>
-                <p>Minecraft HUDs, health bars, and more - built in.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">⚡</div>
-                <h3>One-Click Export</h3>
-                <p>Download ready-to-upload MP4 files instantly.</p>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="pricing" id="pricing">
-        <div class="section-title">
-            <h2>Simple Pricing</h2>
-            <p>Start free, upgrade when you need more</p>
-        </div>
-        <div class="pricing-grid">
-            <div class="price-card">
-                <h3>Free</h3>
-                <div class="price">$0<span>/month</span></div>
-                <ul class="price-features">
-                    <li>3 videos per month</li>
-                    <li>Basic templates</li>
-                    <li>Watermarked output</li>
-                </ul>
-                <a href="app.html" class="btn btn-secondary">Get Started</a>
+        <!-- Features -->
+        <section class="features">
+            <h2>Why SpotMe?</h2>
+            <div class="features-grid">
+                <div class="feature">
+                    <div class="icon">⚡</div>
+                    <h3>Instant Generation</h3>
+                    <p>Get your billboard in under 30 seconds with cutting-edge AI.</p>
+                </div>
+                <div class="feature">
+                    <div class="icon">🌍</div>
+                    <h3>Global Locations</h3>
+                    <p>NYC, Tokyo, London, highways, and magazine covers.</p>
+                </div>
+                <div class="feature">
+                    <div class="icon">📱</div>
+                    <h3>Social Ready</h3>
+                    <p>Download in Story, Square, or Landscape format.</p>
+                </div>
+                <div class="feature">
+                    <div class="icon">🎁</div>
+                    <h3>3 Free Credits</h3>
+                    <p>No credit card required to start.</p>
+                </div>
             </div>
-            <div class="price-card featured">
-                <h3>Creator</h3>
-                <div class="price">$29<span>/month</span></div>
-                <ul class="price-features">
-                    <li>150 videos per month</li>
-                    <li>All templates</li>
-                    <li>No watermark</li>
-                    <li>Priority rendering</li>
-                    <li>Custom overlays</li>
-                </ul>
-                <a href="#" class="btn btn-primary">Subscribe</a>
-            </div>
-            <div class="price-card">
-                <h3>Pro</h3>
-                <div class="price">$49<span>/month</span></div>
-                <ul class="price-features">
-                    <li>500 videos per month</li>
-                    <li>Everything in Creator</li>
-                    <li>API access</li>
-                    <li>Bulk generation</li>
-                    <li>White-label</li>
-                </ul>
-                <a href="#" class="btn btn-secondary">Contact Us</a>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="cta">
-        <h2>Ready to Go Viral?</h2>
-        <p>Join thousands of creators using AI to scale their content</p>
-        <a href="app.html" class="btn btn-primary">Start Creating Free →</a>
-    </section>
+        <!-- CTA -->
+        <section class="cta-section">
+            <h2>Ready to go viral?</h2>
+            <p>Create your first billboard in seconds.</p>
+            <a href="app.html" class="hero-cta">
+                🚀 Start Creating
+            </a>
+        </section>
 
-    <footer>
-        <p>© 2025 GhostClips.io. Built with 👻</p>
-    </footer>
+        <!-- Footer -->
+        <footer>
+            <p>© 2026 SpotMe. All images are AI-generated.</p>
+            <p>
+                <a href="#">Terms</a> •
+                <a href="#">Privacy</a> •
+                <a href="#">Contact</a>
+            </p>
+        </footer>
+    </div>
 </body>
 
 </html>

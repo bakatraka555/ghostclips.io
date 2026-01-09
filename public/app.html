@@ -3,8 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Video - GhostClips</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>SpotMe - AI Billboard Generator</title>
+    <meta name="description" content="Generate photorealistic billboards with your text in iconic locations worldwide.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -12,335 +16,340 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         :root {
-            --primary: #FFD93D;
-            --primary-dark: #F4C430;
-            --dark: #0a0a0a;
-            --dark-card: #141414;
-            --dark-input: #1a1a1a;
-            --gray: #888;
-            --white: #fff;
-            --success: #4ade80;
-            --error: #f87171;
+            --bg: #0a0a0a;
+            --surface: #1a1a1a;
+            --surface-light: #2a2a2a;
+            --primary: #00f5d4;
+            --secondary: #ff006e;
+            --accent: #8338ec;
+            --text: #ffffff;
+            --text-muted: #888888;
+            --safe-bottom: env(safe-area-inset-bottom, 20px);
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: var(--dark);
-            color: var(--white);
-            min-height: 100vh;
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
         }
 
-        /* Header */
-        header {
-            padding: 1rem 2rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        .app {
+            height: 100%;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            position: relative;
         }
 
-        .logo {
-            font-size: 1.25rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            text-decoration: none;
-            color: var(--white);
-        }
-
-        .logo span {
-            color: var(--primary);
-        }
-
-        .credits {
-            background: var(--dark-card);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-        }
-
-        .credits strong {
-            color: var(--primary);
-        }
-
-        /* Main Layout */
-        main {
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 2rem;
-            padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        @media (max-width: 1024px) {
-            main {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Generator Panel */
-        .generator {
-            background: var(--dark-card);
-            border-radius: 16px;
-            padding: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-
-        input,
-        textarea,
-        select {
-            width: 100%;
-            padding: 0.875rem 1rem;
-            background: var(--dark-input);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: var(--white);
-            font-size: 1rem;
-            font-family: inherit;
-            transition: border-color 0.2s;
-        }
-
-        input:focus,
-        textarea:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .input-group input {
+        /* Full-screen Preview */
+        .preview-container {
             flex: 1;
-        }
-
-        .btn {
-            padding: 0.875rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: var(--dark);
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .btn-secondary {
-            background: var(--dark-input);
-            color: var(--white);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .btn-icon {
-            padding: 0.875rem;
-            font-size: 1.25rem;
-        }
-
-        /* Templates */
-        .templates {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.75rem;
-        }
-
-        .template-option {
-            background: var(--dark-input);
-            border: 2px solid transparent;
-            border-radius: 8px;
-            padding: 1rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .template-option:hover {
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .template-option.active {
-            border-color: var(--primary);
-        }
-
-        .template-option .icon {
-            font-size: 1.5rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .template-option .name {
-            font-size: 0.8rem;
-            color: var(--gray);
-        }
-
-        /* Categories */
-        .categories {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-
-        .category-tag {
-            padding: 0.5rem 1rem;
-            background: var(--dark-input);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .category-tag:hover {
-            border-color: var(--primary);
-            background: rgba(255, 217, 61, 0.1);
-        }
-
-        /* Generate Button */
-        .generate-section {
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .btn-generate {
-            width: 100%;
-            padding: 1rem;
-            font-size: 1.1rem;
-        }
-
-        /* Preview Panel */
-        .preview {
-            background: var(--dark-card);
-            border-radius: 16px;
-            padding: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .preview h2 {
-            font-size: 1.25rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .preview-area {
-            aspect-ratio: 9/16;
-            background: var(--dark-input);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: relative;
             overflow: hidden;
-            margin-bottom: 1rem;
-        }
-
-        .preview-placeholder {
-            text-align: center;
-            color: var(--gray);
-        }
-
-        .preview-placeholder .icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            opacity: 0.3;
+            background: linear-gradient(180deg, #1a1a2e 0%, #0a0a0a 100%);
         }
 
         .preview-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            opacity: 0.9;
         }
 
-        .preview-actions {
+        .preview-placeholder {
+            width: 100%;
+            height: 100%;
             display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .preview-placeholder .icon {
+            font-size: 4rem;
+            opacity: 0.3;
+        }
+
+        .preview-placeholder p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        /* Top Bar Overlay */
+        .top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 3rem 1rem 1rem;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
             gap: 0.5rem;
         }
 
-        .preview-actions .btn {
-            flex: 1;
+        .logo span {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        /* Status */
-        .status {
-            margin-top: 1rem;
-            padding: 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            display: none;
+        .credits-badge {
+            background: var(--surface);
+            padding: 0.5rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
         }
 
-        .status.show {
-            display: block;
-        }
-
-        .status.loading {
-            background: rgba(255, 217, 61, 0.1);
-            border: 1px solid rgba(255, 217, 61, 0.3);
+        .credits-badge strong {
             color: var(--primary);
         }
 
-        .status.success {
-            background: rgba(74, 222, 128, 0.1);
-            border: 1px solid rgba(74, 222, 128, 0.3);
-            color: var(--success);
+        /* Side Actions (TikTok style) */
+        .side-actions {
+            position: absolute;
+            right: 1rem;
+            bottom: 50%;
+            transform: translateY(50%);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            z-index: 10;
         }
 
-        .status.error {
-            background: rgba(248, 113, 113, 0.1);
-            border: 1px solid rgba(248, 113, 113, 0.3);
-            color: var(--error);
+        .action-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: none;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
         }
 
-        /* Loading spinner */
+        .action-btn:hover,
+        .action-btn:active {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.1);
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        .action-btn .label {
+            display: none;
+        }
+
+        /* Download Dropdown */
+        .download-dropdown {
+            position: absolute;
+            bottom: calc(100% + 10px);
+            right: 0;
+            background: var(--surface);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            display: none;
+            min-width: 160px;
+        }
+
+        .download-dropdown.show {
+            display: block;
+            animation: slideUp 0.2s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .download-dropdown button {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: none;
+            border: none;
+            color: var(--text);
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .download-dropdown button:hover {
+            background: var(--surface-light);
+        }
+
+        /* Bottom Controls */
+        .controls {
+            padding: 1rem;
+            padding-bottom: calc(1rem + var(--safe-bottom));
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.8) 100%);
+            position: relative;
+            z-index: 20;
+        }
+
+        /* Text Input */
+        .text-input-wrap {
+            margin-bottom: 1rem;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 1rem;
+            background: var(--surface);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 1rem;
+            font-family: inherit;
+            resize: none;
+            transition: border-color 0.2s;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .text-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Scene Carousel */
+        .scenes-wrap {
+            margin-bottom: 1rem;
+        }
+
+        .scenes-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .scenes {
+            display: flex;
+            gap: 0.75rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .scenes::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scene-card {
+            flex-shrink: 0;
+            width: 80px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .scene-card .thumb {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            background: var(--surface);
+            border: 2px solid transparent;
+            overflow: hidden;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .scene-card.active .thumb {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(0, 245, 212, 0.3);
+        }
+
+        .scene-card .name {
+            margin-top: 0.5rem;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .scene-card.active .name {
+            color: var(--primary);
+        }
+
+        /* Generate Button */
+        .generate-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border: none;
+            border-radius: 12px;
+            color: var(--bg);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .generate-btn:hover {
+            transform: scale(1.02);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Loading Spinner */
         .spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
+            width: 20px;
+            height: 20px;
             border: 2px solid transparent;
             border-top-color: currentColor;
             border-radius: 50%;
@@ -352,196 +361,189 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* Status Toast */
+        .toast {
+            position: fixed;
+            bottom: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--surface);
+            padding: 0.75rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .toast.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .toast.error {
+            background: rgba(255, 0, 110, 0.2);
+            border: 1px solid var(--secondary);
+        }
+
+        .toast.success {
+            background: rgba(0, 245, 212, 0.2);
+            border: 1px solid var(--primary);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
     </style>
 </head>
 
 <body>
-    <header>
-        <a href="index.html" class="logo">👻 <span>GhostClips</span></a>
-        <div class="credits">Credits: <strong id="creditsCount">3</strong> / 3</div>
-    </header>
-
-    <main>
-        <section class="generator">
-            <h1>🎬 Create Video</h1>
-
-            <div class="form-group">
-                <label>Prompt</label>
-                <div class="input-group">
-                    <input type="text" id="prompt"
-                        placeholder="Describe your image... e.g., 'Fat Pikachu eating diamonds in Minecraft'">
-                    <button class="btn btn-secondary btn-icon" id="randomBtn" title="Get random prompt">🎲</button>
-                </div>
-                <div class="categories">
-                    <span class="category-tag" data-category="cursedMinecraft">🧊 Cursed Minecraft</span>
-                    <span class="category-tag" data-category="oceanHorror">🌊 Ocean Horror</span>
-                    <span class="category-tag" data-category="monsterHybrid">👹 Monster Hybrid</span>
-                    <span class="category-tag" data-category="spaceHorror">🌌 Space Horror</span>
-                </div>
+    <div class="app">
+        <!-- Full Screen Preview -->
+        <div class="preview-container" id="previewContainer">
+            <div class="preview-placeholder" id="placeholder">
+                <div class="icon">🏙️</div>
+                <p>Your billboard will appear here</p>
+                <p style="font-size: 0.8rem; opacity: 0.6;">Enter your message and hit Generate</p>
             </div>
+        </div>
 
-            <div class="form-group">
-                <label>Template</label>
-                <div class="templates">
-                    <div class="template-option active" data-template="zoomOut">
-                        <div class="icon">🔍</div>
-                        <div class="name">Zoom Out</div>
-                    </div>
-                    <div class="template-option" data-template="zoomIn">
-                        <div class="icon">🔎</div>
-                        <div class="name">Zoom In</div>
-                    </div>
-                    <div class="template-option" data-template="glitch">
-                        <div class="icon">📺</div>
-                        <div class="name">Glitch</div>
-                    </div>
-                </div>
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="logo">📍 <span>SpotMe</span></div>
+            <div class="credits-badge">
+                🎫 <strong id="credits">3</strong>/3 free
             </div>
+        </div>
 
-            <div class="form-group">
-                <label>Narration Text (optional)</label>
-                <textarea id="narration"
-                    placeholder="e.g., 'This Minecraft world looks completely normal... but look closer.'"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>Voice</label>
-                <select id="voice">
-                    <option value="en-US-Neural2-J">Male - Dramatic</option>
-                    <option value="en-US-Neural2-D">Male - Deep</option>
-                    <option value="en-US-Neural2-A">Female - Neutral</option>
-                    <option value="en-US-Neural2-F">Female - Expressive</option>
-                </select>
-            </div>
-
-            <div class="generate-section">
-                <button class="btn btn-primary btn-generate" id="generateBtn">
-                    🎬 Generate Video
+        <!-- Side Actions (TikTok style) -->
+        <div class="side-actions" id="sideActions" style="display: none;">
+            <button class="action-btn" id="shareBtn" title="Share">
+                🔗
+            </button>
+            <div style="position: relative;">
+                <button class="action-btn primary" id="downloadBtn" title="Download">
+                    ⬇️
                 </button>
+                <div class="download-dropdown" id="downloadDropdown">
+                    <button data-ratio="9:16">📱 Story (9:16)</button>
+                    <button data-ratio="1:1">⬜ Square (1:1)</button>
+                    <button data-ratio="16:9">🖥️ Landscape (16:9)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Controls -->
+        <div class="controls">
+            <div class="text-input-wrap">
+                <textarea class="text-input" id="messageInput" placeholder="Enter your billboard message..." rows="2"
+                    maxlength="140"></textarea>
             </div>
 
-            <div class="status" id="status"></div>
-        </section>
-
-        <section class="preview">
-            <h2>Preview</h2>
-            <div class="preview-area" id="previewArea">
-                <div class="preview-placeholder">
-                    <div class="icon">🖼️</div>
-                    <p>Your video preview will appear here</p>
+            <div class="scenes-wrap">
+                <div class="scenes-label">Choose Scene</div>
+                <div class="scenes" id="scenes">
+                    <div class="scene-card active" data-scene="nyc">
+                        <div class="thumb">🗽</div>
+                        <div class="name">NYC</div>
+                    </div>
+                    <div class="scene-card" data-scene="tokyo">
+                        <div class="thumb">🗼</div>
+                        <div class="name">Tokyo</div>
+                    </div>
+                    <div class="scene-card" data-scene="london">
+                        <div class="thumb">🎡</div>
+                        <div class="name">London</div>
+                    </div>
+                    <div class="scene-card" data-scene="highway">
+                        <div class="thumb">🛣️</div>
+                        <div class="name">Highway</div>
+                    </div>
+                    <div class="scene-card" data-scene="magazine">
+                        <div class="thumb">📰</div>
+                        <div class="name">Magazine</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Audio Preview -->
-            <div class="audio-section" id="audioSection"
-                style="display: none; margin: 1rem 0; padding: 1rem; background: var(--dark-input); border-radius: 8px;">
-                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
-                    <span style="font-size: 0.9rem;">🔊 Audio Narration</span>
-                    <button class="btn btn-secondary" id="generateAudioBtn"
-                        style="padding: 0.5rem 1rem; font-size: 0.8rem;">
-                        🗣️ Generate Audio
-                    </button>
-                </div>
-                <audio id="audioPlayer" controls style="width: 100%; height: 40px; display: none;"></audio>
-            </div>
+            <button class="generate-btn" id="generateBtn">
+                ✨ Generate Billboard
+            </button>
+        </div>
+    </div>
 
-            <div class="preview-actions">
-                <button class="btn btn-secondary" id="downloadBtn" disabled>⬇️ Download</button>
-                <button class="btn btn-secondary" id="regenerateBtn" disabled>🔄 Regenerate</button>
-            </div>
-        </section>
-    </main>
+    <div class="toast" id="toast"></div>
 
     <script>
         // State
-        let selectedTemplate = 'zoomOut';
+        let selectedScene = 'nyc';
         let generatedImageUrl = null;
+        let credits = 3;
 
         // Elements
-        const promptInput = document.getElementById('prompt');
-        const narrationInput = document.getElementById('narration');
-        const voiceSelect = document.getElementById('voice');
+        const messageInput = document.getElementById('messageInput');
         const generateBtn = document.getElementById('generateBtn');
-        const randomBtn = document.getElementById('randomBtn');
-        const statusEl = document.getElementById('status');
-        const previewArea = document.getElementById('previewArea');
+        const previewContainer = document.getElementById('previewContainer');
+        const placeholder = document.getElementById('placeholder');
+        const sideActions = document.getElementById('sideActions');
         const downloadBtn = document.getElementById('downloadBtn');
-        const regenerateBtn = document.getElementById('regenerateBtn');
+        const downloadDropdown = document.getElementById('downloadDropdown');
+        const shareBtn = document.getElementById('shareBtn');
+        const toast = document.getElementById('toast');
+        const creditsEl = document.getElementById('credits');
 
-        // Template selection
-        document.querySelectorAll('.template-option').forEach(option => {
-            option.addEventListener('click', () => {
-                document.querySelectorAll('.template-option').forEach(o => o.classList.remove('active'));
-                option.classList.add('active');
-                selectedTemplate = option.dataset.template;
+        // Scene prompts
+        const scenePrompts = {
+            nyc: 'A photorealistic Times Square at night in New York City, neon lights everywhere, crowds of people, yellow taxis. A massive digital billboard on a skyscraper displays the text: "{TEXT}". The billboard glows with vibrant neon colors. High quality, 8K, cinematic.',
+            tokyo: 'A photorealistic Shibuya Crossing in Tokyo at night, neon signs everywhere, crowds crossing the street. A huge digital billboard on a building displays the text: "{TEXT}". Japanese aesthetic, cyberpunk vibes. High quality, 8K.',
+            london: 'A photorealistic Piccadilly Circus in London at night, iconic curved LED screens, red double-decker buses, crowds. A massive billboard displays the text: "{TEXT}". British atmosphere. High quality, 8K.',
+            highway: 'A photorealistic desert highway at sunset, American Southwest, dramatic orange sky. A large roadside billboard stands alone, displaying the text: "{TEXT}". Cinematic, open road feeling. High quality, 8K.',
+            magazine: 'A photorealistic professional business magazine cover layout, clean modern design, bold typography. The main headline reads: "{TEXT}". Professional photography style, minimal elegant design. High quality, print ready.'
+        };
+
+        // Scene selection
+        document.querySelectorAll('.scene-card').forEach(card => {
+            card.addEventListener('click', () => {
+                document.querySelectorAll('.scene-card').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                selectedScene = card.dataset.scene;
             });
         });
 
-        // Category selection
-        document.querySelectorAll('.category-tag').forEach(tag => {
-            tag.addEventListener('click', async () => {
-                const category = tag.dataset.category;
-                await getRandomPrompt(category);
-            });
-        });
+        // Generate
+        generateBtn.addEventListener('click', async () => {
+            const message = messageInput.value.trim();
 
-        // Random prompt button
-        randomBtn.addEventListener('click', () => getRandomPrompt());
-
-        async function getRandomPrompt(category = null) {
-            try {
-                randomBtn.disabled = true;
-                randomBtn.textContent = '⏳';
-
-                const response = await fetch('/api/random-prompt', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ category })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    promptInput.value = data.prompt;
-                    narrationInput.value = data.narration;
-
-                    // Update template
-                    document.querySelectorAll('.template-option').forEach(o => {
-                        o.classList.toggle('active', o.dataset.template === data.template);
-                    });
-                    selectedTemplate = data.template;
-                }
-            } catch (error) {
-                console.error('Error getting random prompt:', error);
-            } finally {
-                randomBtn.disabled = false;
-                randomBtn.textContent = '🎲';
+            if (!message) {
+                showToast('Please enter a message', 'error');
+                return;
             }
-        }
 
-        // Generate button
-        generateBtn.addEventListener('click', generateImage);
-
-        async function generateImage() {
-            const prompt = promptInput.value.trim();
-
-            if (!prompt) {
-                showStatus('Please enter a prompt', 'error');
+            if (credits <= 0) {
+                showToast('No credits left! Upgrade for more.', 'error');
                 return;
             }
 
             try {
                 generateBtn.disabled = true;
                 generateBtn.innerHTML = '<span class="spinner"></span> Generating...';
-                showStatus('🎨 Generating image with AI...', 'loading');
+                showToast('🎨 Creating your billboard...', '');
+
+                const prompt = scenePrompts[selectedScene].replace('{TEXT}', message);
 
                 const response = await fetch('/api/generate-image', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        prompt,
-                        style: `${selectedTemplate} video reveal style`
-                    })
+                    body: JSON.stringify({ prompt, style: 'billboard' })
                 });
 
                 const data = await response.json();
@@ -550,101 +552,88 @@
                     generatedImageUrl = data.imageUrl || data.imageData;
 
                     // Show preview
-                    previewArea.innerHTML = `<img class="preview-image" src="${generatedImageUrl}" alt="Generated image">`;
+                    previewContainer.innerHTML = `<img class="preview-image" src="${generatedImageUrl}" alt="Generated billboard">`;
 
-                    // Enable buttons
-                    downloadBtn.disabled = false;
-                    regenerateBtn.disabled = false;
-
-                    // Show audio section if narration exists
-                    const audioSection = document.getElementById('audioSection');
-                    if (narrationInput.value.trim()) {
-                        audioSection.style.display = 'block';
-                    }
-
-                    showStatus('✅ Image generated! Add narration audio below.', 'success');
+                    // Show side actions
+                    sideActions.style.display = 'flex';
 
                     // Update credits
-                    const creditsEl = document.getElementById('creditsCount');
-                    const current = parseInt(creditsEl.textContent);
-                    if (current > 0) creditsEl.textContent = current - 1;
+                    credits--;
+                    creditsEl.textContent = credits;
 
+                    showToast('✅ Billboard created!', 'success');
                 } else {
                     throw new Error(data.error || 'Generation failed');
                 }
 
             } catch (error) {
                 console.error('Error:', error);
-                showStatus(`❌ Error: ${error.message}`, 'error');
+                showToast('❌ ' + error.message, 'error');
             } finally {
                 generateBtn.disabled = false;
-                generateBtn.textContent = '🎬 Generate Video';
+                generateBtn.innerHTML = '✨ Generate Billboard';
             }
+        });
+
+        // Download dropdown toggle
+        downloadBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            downloadDropdown.classList.toggle('show');
+        });
+
+        // Close dropdown on outside click
+        document.addEventListener('click', () => {
+            downloadDropdown.classList.remove('show');
+        });
+
+        // Download with ratio
+        downloadDropdown.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const ratio = btn.dataset.ratio;
+                downloadImage(ratio);
+                downloadDropdown.classList.remove('show');
+            });
+        });
+
+        function downloadImage(ratio) {
+            if (!generatedImageUrl) return;
+
+            const a = document.createElement('a');
+            a.href = generatedImageUrl;
+            a.download = `spotme-${selectedScene}-${ratio.replace(':', 'x')}-${Date.now()}.jpg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast('📥 Downloaded!', 'success');
         }
 
-        // Regenerate
-        regenerateBtn.addEventListener('click', generateImage);
+        // Share
+        shareBtn.addEventListener('click', async () => {
+            if (!generatedImageUrl) return;
 
-        // Generate Audio (TTS)
-        const generateAudioBtn = document.getElementById('generateAudioBtn');
-        const audioPlayer = document.getElementById('audioPlayer');
-
-        generateAudioBtn.addEventListener('click', async () => {
-            const text = narrationInput.value.trim();
-            const voice = voiceSelect.value;
-
-            if (!text) {
-                showStatus('Please enter narration text first', 'error');
-                return;
-            }
-
-            try {
-                generateAudioBtn.disabled = true;
-                generateAudioBtn.textContent = '⏳ Generating...';
-                showStatus('🔊 Generating audio narration...', 'loading');
-
-                const response = await fetch('/api/generate-tts', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text, voice })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    const audioSrc = data.audioUrl || data.audioData;
-                    audioPlayer.src = audioSrc;
-                    audioPlayer.style.display = 'block';
-                    audioPlayer.play();
-                    showStatus('✅ Audio generated! Press play to preview.', 'success');
-                } else {
-                    throw new Error(data.error || 'Audio generation failed');
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Check out my SpotMe billboard!',
+                        text: 'I created this AI billboard on SpotMe',
+                        url: window.location.href
+                    });
+                } catch (err) {
+                    console.log('Share cancelled');
                 }
-
-            } catch (error) {
-                console.error('TTS Error:', error);
-                showStatus(`❌ Audio Error: ${error.message}`, 'error');
-            } finally {
-                generateAudioBtn.disabled = false;
-                generateAudioBtn.textContent = '🗣️ Generate Audio';
+            } else {
+                // Fallback: copy URL
+                navigator.clipboard.writeText(window.location.href);
+                showToast('🔗 Link copied!', 'success');
             }
         });
 
-        // Download
-        downloadBtn.addEventListener('click', () => {
-            if (generatedImageUrl) {
-                const a = document.createElement('a');
-                a.href = generatedImageUrl;
-                a.download = 'ghostclips-' + Date.now() + '.jpg';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            }
-        });
-
-        function showStatus(message, type) {
-            statusEl.textContent = message;
-            statusEl.className = 'status show ' + type;
+        // Toast helper
+        function showToast(message, type) {
+            toast.textContent = message;
+            toast.className = 'toast show ' + type;
+            setTimeout(() => toast.classList.remove('show'), 3000);
         }
     </script>
 </body>
