@@ -431,6 +431,20 @@
                     <p>Your video preview will appear here</p>
                 </div>
             </div>
+
+            <!-- Audio Preview -->
+            <div class="audio-section" id="audioSection"
+                style="display: none; margin: 1rem 0; padding: 1rem; background: var(--dark-input); border-radius: 8px;">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                    <span style="font-size: 0.9rem;">🔊 Audio Narration</span>
+                    <button class="btn btn-secondary" id="generateAudioBtn"
+                        style="padding: 0.5rem 1rem; font-size: 0.8rem;">
+                        🗣️ Generate Audio
+                    </button>
+                </div>
+                <audio id="audioPlayer" controls style="width: 100%; height: 40px; display: none;"></audio>
+            </div>
+
             <div class="preview-actions">
                 <button class="btn btn-secondary" id="downloadBtn" disabled>⬇️ Download</button>
                 <button class="btn btn-secondary" id="regenerateBtn" disabled>🔄 Regenerate</button>
@@ -542,7 +556,13 @@
                     downloadBtn.disabled = false;
                     regenerateBtn.disabled = false;
 
-                    showStatus('✅ Image generated! Video processing coming soon...', 'success');
+                    // Show audio section if narration exists
+                    const audioSection = document.getElementById('audioSection');
+                    if (narrationInput.value.trim()) {
+                        audioSection.style.display = 'block';
+                    }
+
+                    showStatus('✅ Image generated! Add narration audio below.', 'success');
 
                     // Update credits
                     const creditsEl = document.getElementById('creditsCount');
@@ -564,6 +584,51 @@
 
         // Regenerate
         regenerateBtn.addEventListener('click', generateImage);
+
+        // Generate Audio (TTS)
+        const generateAudioBtn = document.getElementById('generateAudioBtn');
+        const audioPlayer = document.getElementById('audioPlayer');
+
+        generateAudioBtn.addEventListener('click', async () => {
+            const text = narrationInput.value.trim();
+            const voice = voiceSelect.value;
+
+            if (!text) {
+                showStatus('Please enter narration text first', 'error');
+                return;
+            }
+
+            try {
+                generateAudioBtn.disabled = true;
+                generateAudioBtn.textContent = '⏳ Generating...';
+                showStatus('🔊 Generating audio narration...', 'loading');
+
+                const response = await fetch('/api/generate-tts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, voice })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const audioSrc = data.audioUrl || data.audioData;
+                    audioPlayer.src = audioSrc;
+                    audioPlayer.style.display = 'block';
+                    audioPlayer.play();
+                    showStatus('✅ Audio generated! Press play to preview.', 'success');
+                } else {
+                    throw new Error(data.error || 'Audio generation failed');
+                }
+
+            } catch (error) {
+                console.error('TTS Error:', error);
+                showStatus(`❌ Audio Error: ${error.message}`, 'error');
+            } finally {
+                generateAudioBtn.disabled = false;
+                generateAudioBtn.textContent = '🗣️ Generate Audio';
+            }
+        });
 
         // Download
         downloadBtn.addEventListener('click', () => {
