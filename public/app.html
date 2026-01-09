@@ -404,6 +404,126 @@
                 transform: translateX(-50%) translateY(0);
             }
         }
+
+        /* Desktop Layout - Side by Side */
+        @media (min-width: 768px) {
+            .app {
+                flex-direction: row;
+                height: 100vh;
+            }
+
+            .preview-container {
+                flex: 1;
+                order: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 2rem;
+            }
+
+            .preview-image {
+                max-width: 100%;
+                max-height: 90vh;
+                width: auto;
+                height: auto;
+                border-radius: 16px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            }
+
+            .top-bar {
+                display: none;
+            }
+
+            .side-actions {
+                display: none !important;
+            }
+
+            .controls {
+                order: 2;
+                width: 380px;
+                min-width: 380px;
+                height: 100vh;
+                padding: 2rem;
+                padding-bottom: 2rem;
+                background: var(--surface);
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+
+            .controls::before {
+                content: '📍 SpotMe';
+                display: block;
+                font-size: 1.5rem;
+                font-weight: 800;
+                margin-bottom: 2rem;
+                background: linear-gradient(135deg, var(--primary), var(--secondary));
+                -webkit-background-clip: text;
+                background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+
+            .text-input {
+                font-size: 1.1rem;
+            }
+
+            .scene-card .thumb {
+                width: 70px;
+                height: 70px;
+            }
+
+            .generate-btn {
+                margin-top: 1rem;
+            }
+
+            /* Download buttons for desktop */
+            .desktop-actions {
+                display: flex;
+                gap: 0.5rem;
+                margin-top: 1rem;
+            }
+
+            .desktop-btn {
+                flex: 1;
+                padding: 0.75rem;
+                background: var(--surface-light);
+                border: none;
+                border-radius: 8px;
+                color: var(--text);
+                cursor: pointer;
+                font-size: 0.9rem;
+                transition: all 0.2s;
+            }
+
+            .desktop-btn:hover {
+                background: var(--primary);
+                color: var(--bg);
+            }
+
+            .toast {
+                bottom: 2rem;
+                left: auto;
+                right: 2rem;
+                transform: none;
+            }
+
+            .toast.show {
+                animation: fadeInDesktop 0.3s ease;
+            }
+
+            @keyframes fadeInDesktop {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        }
     </style>
 </head>
 
@@ -479,6 +599,14 @@
             <button class="generate-btn" id="generateBtn">
                 ✨ Generate Billboard
             </button>
+
+            <!-- Desktop Actions (visible only on desktop) -->
+            <div class="desktop-actions" id="desktopActions" style="display: none;">
+                <button class="desktop-btn" id="desktopShare">🔗 Share</button>
+                <button class="desktop-btn" id="desktopDownload9x16">📱 Story</button>
+                <button class="desktop-btn" id="desktopDownload1x1">⬜ Square</button>
+                <button class="desktop-btn" id="desktopDownload16x9">🖥️ Wide</button>
+            </div>
         </div>
     </div>
 
@@ -563,6 +691,7 @@
                     creditsEl.textContent = credits;
 
                     showToast('✅ Billboard created!', 'success');
+                    showDesktopActions();
                 } else {
                     throw new Error(data.error || 'Generation failed');
                 }
@@ -629,6 +758,26 @@
                 showToast('🔗 Link copied!', 'success');
             }
         });
+
+        // Desktop Actions
+        const desktopActions = document.getElementById('desktopActions');
+        const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+
+        document.getElementById('desktopShare')?.addEventListener('click', () => {
+            navigator.clipboard.writeText(window.location.href);
+            showToast('🔗 Link copied!', 'success');
+        });
+
+        document.getElementById('desktopDownload9x16')?.addEventListener('click', () => downloadImage('9:16'));
+        document.getElementById('desktopDownload1x1')?.addEventListener('click', () => downloadImage('1:1'));
+        document.getElementById('desktopDownload16x9')?.addEventListener('click', () => downloadImage('16:9'));
+
+        // Show desktop actions after generation on desktop
+        function showDesktopActions() {
+            if (isDesktop && generatedImageUrl) {
+                desktopActions.style.display = 'flex';
+            }
+        }
 
         // Toast helper
         function showToast(message, type) {
