@@ -230,6 +230,82 @@
             z-index: 20;
         }
 
+        /* Upload Section */
+        .upload-section {
+            margin-bottom: 1rem;
+        }
+
+        .upload-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-row {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .upload-btn {
+            flex: 1;
+            padding: 0.75rem;
+            background: var(--surface);
+            border: 2px dashed var(--text-muted);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .upload-btn:hover {
+            border-color: var(--primary);
+            background: var(--surface-light);
+        }
+
+        .upload-btn.has-image {
+            border-style: solid;
+            border-color: var(--primary);
+        }
+
+        .upload-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .upload-preview.show {
+            display: block;
+        }
+
+        .upload-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .upload-clear {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            display: none;
+        }
+
+        .upload-clear.show {
+            display: block;
+        }
+
         /* Text Input */
         .text-input-wrap {
             margin-bottom: 1rem;
@@ -565,6 +641,19 @@
 
         <!-- Bottom Controls -->
         <div class="controls">
+            <!-- Upload Section (Optional) -->
+            <div class="upload-section">
+                <div class="upload-label">Add Your Image (Optional)</div>
+                <div class="upload-row">
+                    <input type="file" id="userImageInput" accept="image/*" style="display: none;">
+                    <button type="button" class="upload-btn" id="uploadBtn">📷 Upload Photo</button>
+                    <div class="upload-preview" id="uploadPreview">
+                        <img id="uploadPreviewImg" alt="Preview">
+                    </div>
+                    <button type="button" class="upload-clear" id="uploadClear">✕</button>
+                </div>
+            </div>
+
             <div class="text-input-wrap">
                 <textarea class="text-input" id="messageInput" placeholder="Enter your billboard message..." rows="2"
                     maxlength="140"></textarea>
@@ -617,6 +706,7 @@
         let selectedScene = 'nyc';
         let generatedImageUrl = null;
         let credits = 3;
+        let uploadedImageUrl = null; // CDN URL of uploaded image
 
         // Elements
         const messageInput = document.getElementById('messageInput');
@@ -629,6 +719,117 @@
         const shareBtn = document.getElementById('shareBtn');
         const toast = document.getElementById('toast');
         const creditsEl = document.getElementById('credits');
+
+        // Upload elements
+        const userImageInput = document.getElementById('userImageInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const uploadPreview = document.getElementById('uploadPreview');
+        const uploadPreviewImg = document.getElementById('uploadPreviewImg');
+        const uploadClear = document.getElementById('uploadClear');
+
+        // Image optimization (from IMAGE_COMPRESSION_GUIDE.md)
+        async function optimizeImage(file) {
+            // If < 5MB, return original
+            if (file.size < 5 * 1024 * 1024) {
+                return file;
+            }
+
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+
+                    // Keep original dimensions (max 4000px)
+                    let width = img.width;
+                    let height = img.height;
+                    const maxDim = 4000;
+
+                    if (width > maxDim || height > maxDim) {
+                        const ratio = Math.min(maxDim / width, maxDim / height);
+                        width = Math.round(width * ratio);
+                        height = Math.round(height * ratio);
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Convert to JPEG 95% quality
+                    canvas.toBlob((blob) => {
+                        resolve(new File([blob], 'optimized.jpg', { type: 'image/jpeg' }));
+                    }, 'image/jpeg', 0.95);
+                };
+
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        // Upload handlers
+        uploadBtn.addEventListener('click', () => userImageInput.click());
+
+        userImageInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            showToast('📤 Uploading image...', '');
+            uploadBtn.textContent = '⏳ Uploading...';
+
+            try {
+                // Optimize image
+                const optimizedFile = await optimizeImage(file);
+                console.log('Optimized:', (optimizedFile.size / 1024 / 1024).toFixed(2), 'MB');
+
+                // Get upload token
+                const tokenRes = await fetch('/api/create-upload-token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: 'user-image.jpg' })
+                });
+                const tokenData = await tokenRes.json();
+
+                if (!tokenData.success) throw new Error(tokenData.error);
+
+                // Upload to Bunny CDN
+                const uploadRes = await fetch(tokenData.uploadUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'AccessKey': tokenData.apiKey,
+                        'Content-Type': 'image/jpeg'
+                    },
+                    body: optimizedFile
+                });
+
+                if (!uploadRes.ok && uploadRes.status !== 201) {
+                    throw new Error('Upload failed');
+                }
+
+                // Success!
+                uploadedImageUrl = tokenData.cdnUrl;
+                uploadPreviewImg.src = URL.createObjectURL(file);
+                uploadPreview.classList.add('show');
+                uploadClear.classList.add('show');
+                uploadBtn.classList.add('has-image');
+                uploadBtn.textContent = '✅ Image Ready';
+
+                showToast('✅ Image uploaded!', 'success');
+
+            } catch (error) {
+                console.error('Upload error:', error);
+                showToast('❌ Upload failed: ' + error.message, 'error');
+                uploadBtn.textContent = '📷 Upload Photo';
+            }
+        });
+
+        uploadClear.addEventListener('click', () => {
+            uploadedImageUrl = null;
+            userImageInput.value = '';
+            uploadPreview.classList.remove('show');
+            uploadClear.classList.remove('show');
+            uploadBtn.classList.remove('has-image');
+            uploadBtn.textContent = '📷 Upload Photo';
+        });
 
         // Scene prompts
         const scenePrompts = {
@@ -672,7 +873,11 @@
                 const response = await fetch('/api/generate-image', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt, style: 'billboard' })
+                    body: JSON.stringify({
+                        prompt,
+                        style: 'billboard',
+                        userImageUrl: uploadedImageUrl // Include user's image if uploaded
+                    })
                 });
 
                 const data = await response.json();

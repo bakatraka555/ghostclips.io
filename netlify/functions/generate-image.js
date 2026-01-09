@@ -30,7 +30,7 @@ exports.handler = async (event, context) => {
 
     try {
         const body = JSON.parse(event.body);
-        const { prompt, style } = body;
+        const { prompt, style, userImageUrl } = body;
 
         if (!prompt) {
             return {
@@ -53,10 +53,36 @@ exports.handler = async (event, context) => {
             };
         }
 
-        // Enhance prompt for brainrot style
+        // Enhance prompt for billboard style
         const enhancedPrompt = `${prompt}. Style: Highly detailed, viral social media aesthetic, dramatic lighting, 4K quality, trending on social media. ${style || ''}`;
 
         console.log('Generating image with prompt:', enhancedPrompt.substring(0, 100) + '...');
+        console.log('User image URL:', userImageUrl || 'none');
+
+        // Build parts array
+        const parts = [{ text: `Generate an image: ${enhancedPrompt}` }];
+
+        // Add user image if provided
+        if (userImageUrl) {
+            try {
+                console.log('Fetching user image from CDN...');
+                const imageResponse = await fetch(userImageUrl);
+                if (imageResponse.ok) {
+                    const imageBuffer = await imageResponse.buffer();
+                    const imageBase64 = imageBuffer.toString('base64');
+                    const imageMimeType = imageResponse.headers.get('content-type') || 'image/jpeg';
+
+                    parts.push({
+                        inline_data: { mime_type: imageMimeType, data: imageBase64 }
+                    });
+                    console.log('User image added:', imageBuffer.length, 'bytes');
+                } else {
+                    console.warn('Could not fetch user image:', imageResponse.status);
+                }
+            } catch (imageError) {
+                console.warn('Error fetching user image:', imageError.message);
+            }
+        }
 
         // Call Google AI (Gemini Image Model)
         const GEMINI_MODEL = 'gemini-3-pro-image-preview';
@@ -67,7 +93,7 @@ exports.handler = async (event, context) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{
-                        parts: [{ text: `Generate an image: ${enhancedPrompt}` }]
+                        parts: parts
                     }],
                     generationConfig: {
                         responseModalities: ["IMAGE"],
