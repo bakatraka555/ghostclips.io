@@ -2,11 +2,10 @@
     "name": "spotme-billboard",
     "version": "1.0.0",
     "description": "AI Billboard Generator - See yourself where you've always dreamed",
-    "type": "module",
     "scripts": {
         "start": "npx serve public"
     },
     "dependencies": {
-        "node-fetch": "^3.3.2"
+        "node-fetch": "^2.7.0"
     }
 }
