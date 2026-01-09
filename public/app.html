@@ -565,13 +565,15 @@
         // Regenerate
         regenerateBtn.addEventListener('click', generateImage);
 
-        // Download (placeholder)
+        // Download
         downloadBtn.addEventListener('click', () => {
             if (generatedImageUrl) {
                 const a = document.createElement('a');
                 a.href = generatedImageUrl;
-                a.download = 'nano-banana-' + Date.now() + '.jpg';
+                a.download = 'ghostclips-' + Date.now() + '.jpg';
+                document.body.appendChild(a);
                 a.click();
+                document.body.removeChild(a);
             }
         });
 
