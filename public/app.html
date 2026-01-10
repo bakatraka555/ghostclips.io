@@ -843,11 +843,23 @@
             const file = e.target.files[0];
             if (!file) return;
 
-            showToast('📤 Uploading image...', '');
-            uploadBtn.textContent = '⏳ Uploading...';
+            // 1. Immediate Preview (Better UX)
+            const objectUrl = URL.createObjectURL(file);
+            uploadPreviewImg.src = objectUrl;
+            uploadPreview.classList.add('show');
+            uploadClear.classList.add('show');
+            uploadBtn.textContent = '⏳ Processing...';
+
+            // 2. Client-side Validation
+            if (file.size > 20 * 1024 * 1024) { // 20MB limit
+                resetUpload();
+                showToast('❌ Image too large (max 20MB)', 'error');
+                return;
+            }
 
             try {
-                // Optimize image
+                // Optimize
+                // showToast('📤 Optimizing image...', ''); // Too much toaster spam
                 const optimizedFile = await optimizeImage(file);
                 console.log('Optimized:', (optimizedFile.size / 1024 / 1024).toFixed(2), 'MB');
 
@@ -857,11 +869,14 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ filename: 'user-image.jpg' })
                 });
-                const tokenData = await tokenRes.json();
 
-                if (!tokenData.success) throw new Error(tokenData.error);
+                if (!tokenRes.ok) throw new Error('Connection to server failed');
+
+                const tokenData = await tokenRes.json();
+                if (!tokenData.success) throw new Error(tokenData.error || 'Server rejected request');
 
                 // Upload to Bunny CDN
+                uploadBtn.textContent = '☁️ Uploading...';
                 const uploadRes = await fetch(tokenData.uploadUrl, {
                     method: 'PUT',
                     headers: {
@@ -871,35 +886,36 @@
                     body: optimizedFile
                 });
 
-                if (!uploadRes.ok && uploadRes.status !== 201) {
-                    throw new Error('Upload failed');
+                if (!uploadRes.ok) {
+                    throw new Error('Upload server rejected file');
                 }
 
                 // Success!
                 uploadedImageUrl = tokenData.cdnUrl;
-                uploadPreviewImg.src = URL.createObjectURL(file);
-                uploadPreview.classList.add('show');
-                uploadClear.classList.add('show');
                 uploadBtn.classList.add('has-image');
                 uploadBtn.textContent = '✅ Image Ready';
-
-                showToast('✅ Image uploaded!', 'success');
+                showToast('✅ Image uploaded successfully!', 'success');
 
             } catch (error) {
                 console.error('Upload error:', error);
-                showToast('❌ Upload failed: ' + error.message, 'error');
-                uploadBtn.textContent = '📷 Upload Photo';
+                resetUpload(); // Hide preview on failure
+
+                let msg = error.message;
+                if (msg.includes('fetch')) msg = 'Network error. Check connection.';
+                showToast('❌ Upload failed: ' + msg, 'error');
             }
         });
 
-        uploadClear.addEventListener('click', () => {
+        function resetUpload() {
             uploadedImageUrl = null;
             userImageInput.value = '';
             uploadPreview.classList.remove('show');
             uploadClear.classList.remove('show');
             uploadBtn.classList.remove('has-image');
             uploadBtn.textContent = '📷 Upload Photo';
-        });
+        }
+
+        uploadClear.addEventListener('click', resetUpload);
 
         // Scene prompts
         const scenePrompts = {
