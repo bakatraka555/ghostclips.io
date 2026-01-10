@@ -92,8 +92,36 @@ exports.handler = async (event, context) => {
             }
         };
 
-        console.log('Calling Gemini API...');
-        const geminiResponse = await fetch(apiUrl, {
+        // Helper: Fetch with Exponential Backoff
+        const fetchWithRetry = async (url, options, retries = 3) => {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+
+                    // If success or non-retriable error (400, 401, etc), return response
+                    if (response.ok || (response.status < 500 && response.status !== 429)) {
+                        return response;
+                    }
+
+                    // If last retry, return response (to be handled by caller)
+                    if (i === retries - 1) return response;
+
+                    // Calculate delay: 2s, 4s, 8s...
+                    const delay = 2000 * Math.pow(2, i);
+                    console.log(`⚠️ API Retry ${i + 1}/${retries} after ${delay}ms (Status: ${response.status})`);
+                    await new Promise(r => setTimeout(r, delay));
+
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    const delay = 2000 * Math.pow(2, i);
+                    console.log(`⚠️ Network Retry ${i + 1}/${retries} after ${delay}ms (${error.message})`);
+                    await new Promise(r => setTimeout(r, delay));
+                }
+            }
+        };
+
+        console.log('Calling Gemini API (with retry)...');
+        const geminiResponse = await fetchWithRetry(apiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody)

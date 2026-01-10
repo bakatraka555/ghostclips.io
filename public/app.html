@@ -173,6 +173,67 @@
             display: none;
         }
 
+        /* Hacker Terminal Loading */
+        .terminal-loader {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 600px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: 'Courier New', Courier, monospace;
+            color: var(--primary);
+            text-shadow: 0 0 5px var(--primary);
+            z-index: 100;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+            text-align: left;
+        }
+
+        .terminal-loader.active {
+            display: block;
+        }
+
+        .terminal-line {
+            margin-bottom: 0.5rem;
+            opacity: 0;
+            animation: fadeIn 0.3s forwards;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .terminal-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 15px;
+            background: var(--primary);
+            animation: blink 1s infinite;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
         /* Download Dropdown */
         .download-dropdown {
             position: absolute;
@@ -699,6 +760,11 @@
         </div>
     </div>
 
+    <!-- Hacker Terminal Loader -->
+    <div class="terminal-loader" id="terminalLoader">
+        <div id="terminalContent"></div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
     <script>
@@ -850,6 +916,56 @@
         });
 
         // Generate
+        // Hacker Terminal Logic
+        const terminalLoader = document.getElementById('terminalLoader');
+        const terminalContent = document.getElementById('terminalContent');
+
+        const terminalLines = [
+            "Initializing neural link...",
+            "Connecting to satellite uplink...",
+            "Bypassing mainframe firewall...",
+            "[SUCCESS] Access granted.",
+            "Allocating GPU cluster...",
+            "Rendering photorealistic textures...",
+            "Calculating light physics...",
+            "Injecting user data...",
+            "Compiling final pixels...",
+            "Finishing touches..."
+        ];
+
+        async function showTerminalLoader() {
+            terminalLoader.classList.add('active');
+            terminalContent.innerHTML = '';
+
+            for (const line of terminalLines) {
+                if (!terminalLoader.classList.contains('active')) break;
+
+                const div = document.createElement('div');
+                div.className = 'terminal-line';
+                div.innerHTML = `> ${line}`;
+                terminalContent.appendChild(div);
+
+                // Add cursor to current line
+                const cursor = document.createElement('span');
+                cursor.className = 'terminal-cursor';
+                div.appendChild(cursor);
+
+                // Scroll to bottom
+                terminalContent.scrollTop = terminalContent.scrollHeight;
+
+                // Wait random time
+                await new Promise(r => setTimeout(r, 800 + Math.random() * 1000));
+
+                // Remove cursor from finished line
+                if (cursor.parentNode) cursor.remove();
+            }
+        }
+
+        function hideTerminalLoader() {
+            terminalLoader.classList.remove('active');
+        }
+
+        // Generate with Smart Polling (Background Function)
         generateBtn.addEventListener('click', async () => {
             const message = messageInput.value.trim();
 
@@ -865,41 +981,51 @@
 
             try {
                 generateBtn.disabled = true;
-                generateBtn.innerHTML = '<span class="spinner"></span> Generating...';
-                showToast('🎨 Creating your billboard...', '');
+                generateBtn.innerHTML = '<span class="spinner"></span> Hacking...';
+
+                // Start Terminal Animation
+                showTerminalLoader();
 
                 const prompt = scenePrompts[selectedScene].replace('{TEXT}', message);
 
-                const response = await fetch('/api/generate-image', {
+                // 1. Generate unique filename and Job ID
+                const jobId = 'job-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+                const outputFilename = `spotme-${jobId}.jpg`;
+
+                // 2. Trigger Background Function
+                console.log('Triggering background job:', jobId);
+
+                const response = await fetch('/api/generate-image-background', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         prompt,
-                        style: 'billboard',
-                        userImageUrl: uploadedImageUrl // Include user's image if uploaded
+                        text: message,
+                        scene: selectedScene,
+                        jobId: jobId,
+                        outputFilename: outputFilename,
+                        userImageUrl: uploadedImageUrl
                     })
                 });
 
-                const data = await response.json();
-
-                if (data.success) {
-                    generatedImageUrl = data.imageUrl || data.imageData;
-
-                    // Show preview
-                    previewContainer.innerHTML = `<img class="preview-image" src="${generatedImageUrl}" alt="Generated billboard">`;
-
-                    // Show side actions
-                    sideActions.style.display = 'flex';
-
-                    // Update credits
-                    credits--;
-                    creditsEl.textContent = credits;
-
-                    showToast('✅ Billboard created!', 'success');
-                    showDesktopActions();
-                } else {
-                    throw new Error(data.error || 'Generation failed');
+                if (!response.ok) {
+                    throw new Error('Failed to start generation');
                 }
+
+                // 3. Start Smart Polling
+                generateBtn.innerHTML = '<span class="spinner"></span> Generating...';
+                showToast('🎨 Creating your billboard (this takes ~30s)...', '');
+
+                const finalImageUrl = await pollForImage(outputFilename);
+
+                // 4. Success!
+                generatedImageUrl = finalImageUrl;
+                previewContainer.innerHTML = `<img class="preview-image" src="${generatedImageUrl}" alt="Generated billboard">`;
+                sideActions.style.display = 'flex';
+                credits--;
+                creditsEl.textContent = credits;
+                showToast('✅ Billboard created!', 'success');
+                showDesktopActions();
 
             } catch (error) {
                 console.error('Error:', error);
@@ -907,8 +1033,59 @@
             } finally {
                 generateBtn.disabled = false;
                 generateBtn.innerHTML = '✨ Generate Billboard';
+                hideTerminalLoader();
             }
         });
+
+        // Smart Polling Function (Incremental Backoff)
+        async function pollForImage(filename) {
+            const cdnDomain = 'spotme.b-cdn.net'; // Hardcoded for now, ideal to get from env
+            const imageUrl = `https://${cdnDomain}/${filename}`;
+
+            let attempts = 0;
+            const maxAttempts = 60; // 5-10 mins max
+
+            // Incremental polling intervals: 2s, 4s, 6s, 8s, then 10s...
+            const getDelay = (attempt) => {
+                if (attempt < 4) return (attempt + 1) * 2000;
+                return 10000; // Cap at 10s
+            };
+
+            return new Promise((resolve, reject) => {
+                const check = async () => {
+                    attempts++;
+                    console.log(`Polling attempt ${attempts}/${maxAttempts} for ${filename}`);
+
+                    try {
+                        // Check if file exists on CDN (HEAD request)
+                        // Note: Using fetch with 'no-cache' to avoid browser caching failed checks
+                        const res = await fetch(imageUrl, {
+                            method: 'HEAD',
+                            cache: 'no-store'
+                        });
+
+                        if (res.ok) {
+                            console.log('File found!');
+                            resolve(imageUrl);
+                            return;
+                        }
+                    } catch (e) {
+                        console.warn('Polling check failed:', e);
+                    }
+
+                    if (attempts >= maxAttempts) {
+                        reject(new Error('Generation timed out. Please try again.'));
+                        return;
+                    }
+
+                    const delay = getDelay(attempts);
+                    console.log(`Waiting ${delay}ms...`);
+                    setTimeout(check, delay);
+                };
+
+                check();
+            });
+        }
 
         // Download dropdown toggle
         downloadBtn.addEventListener('click', (e) => {
