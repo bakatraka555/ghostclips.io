@@ -131,16 +131,20 @@
             color: var(--primary);
         }
 
-        /* Side Actions (TikTok style) */
+        /* Side Actions (TikTok style) - Moved to Bottom Right */
         .side-actions {
             position: absolute;
             right: 1rem;
-            bottom: 50%;
-            transform: translateY(50%);
+            /* Thumb zone */
+            bottom: 6rem;
+            /* Above any potential navigation/safe area */
+            /* transform: translateY(50%); REMOVED */
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
-            z-index: 10;
+            z-index: 20;
+            display: none;
+            /* Hidden by default until generated */
         }
 
         .action-btn {
